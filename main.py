@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from schemas import Product
 
 app = FastAPI()
@@ -63,6 +63,28 @@ def get_products(limit: int = 10):
 def get_product(product_id: int):
     return products.get(product_id)
 
+# @app.delete("/products/{product_id}")
+# def delete_product(product_id: int):
+#     return products.pop(product_id, None) # Elimina el producto del diccionario y lo retorna, si no existe retorna None
+
+
+''' 
+    Validaciones
+'''
+# Al intentar eliminar un producto que no existe, FastAPI retornará un error 404 automáticamente, y no un 200 con un null en el body.
 @app.delete("/products/{product_id}")
 def delete_product(product_id: int):
-    return products.pop(product_id, None) # Elimina el producto del diccionario y lo retorna, si no existe retorna None
+    product = products.pop(product_id, None) # Elimina el producto del diccionario y lo retorna, si no existe retorna None
+
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found") # HTTPException se importa desde el paquete de FastAPI 
+
+    return product
+
+def get_product(product_id: int, include_desc: bool = False):
+    product = {"id": product_id, "include_desc": include_desc}
+    
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found") # HTTPException se importa desde el paquete de FastAPI 
+
+    return product
